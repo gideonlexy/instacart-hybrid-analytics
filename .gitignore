@@ -1,0 +1,44 @@
+cat > .gitignore <<'EOF'
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.egg-info/
+
+# Data
+data/raw/*
+data/bronze/*
+data/silver/*
+data/gold/*
+data/processed/*
+!data/**/.gitkeep
+
+# Dashboard deploy data
+!data/dashboard/
+!data/dashboard/.gitkeep
+
+# Models
+models/*
+!models/.gitkeep
+
+# Secrets / env
+.env
+.aws/
+.dbt/
+.databricks/
+kaggle.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Airflow
+airflow/logs/
+airflow-webserver.pid
+
+# dbt
+target/
+dbt_packages/
+logs/
+EOF
