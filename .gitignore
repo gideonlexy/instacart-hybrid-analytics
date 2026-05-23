@@ -17,6 +17,11 @@ data/gold/*
 data/processed/*
 !data/**/.gitkeep
 
+# Local Spark runtime artifacts
+spark-warehouse/
+metastore_db/
+derby.log
+
 # Dashboard deploy data
 data/dashboard/*
 !data/dashboard/
