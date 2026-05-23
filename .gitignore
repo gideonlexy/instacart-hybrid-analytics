@@ -1,10 +1,13 @@
-cat > .gitignore <<'EOF'
 # Python
 .venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 *.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # Data
 data/raw/*
@@ -15,6 +18,7 @@ data/processed/*
 !data/**/.gitkeep
 
 # Dashboard deploy data
+data/dashboard/*
 !data/dashboard/
 !data/dashboard/.gitkeep
 
@@ -22,12 +26,19 @@ data/processed/*
 models/*
 !models/.gitkeep
 
+# Local-only project notes and source guide artifacts
+.local/
+INSTACART_HYBRID_IMPLEMENTATION_GUIDE.pdf
+*_IMPLEMENTATION_GUIDE.pdf
+*_guide_extracted.txt
+
 # Secrets / env
 .env
 .aws/
 .dbt/
 .databricks/
 kaggle.json
+profiles.yml
 
 # OS
 .DS_Store
@@ -41,4 +52,3 @@ airflow-webserver.pid
 target/
 dbt_packages/
 logs/
-EOF
