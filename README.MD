@@ -25,10 +25,12 @@ Completed:
 - Spark smoke test that writes and reads a Delta table.
 - Raw data source contract for required Instacart CSVs.
 - Unit tests for Spark setup and raw data validation.
+- Bronze ingestion from raw CSVs into Delta tables with ingestion metadata.
+- CSV parsing safeguards for quoted product names and numeric field validation.
 
 Next:
 
-- Build Bronze ingestion: raw CSVs to immutable Delta tables with ingestion metadata.
+- Build Silver tables with typed columns, cleaned keys, and business-ready joins.
 
 ## Why This Project
 
@@ -58,4 +60,6 @@ Most portfolio projects stop at notebooks or dashboards. This project is designe
 .venv/bin/python -m pytest tests -v
 .venv/bin/python -m ruff check src scripts tests databricks
 .venv/bin/python scripts/verify_local_spark.py
+.venv/bin/python scripts/validate_raw_data.py
+.venv/bin/python databricks/01_bronze_ingestion.py
 ```
