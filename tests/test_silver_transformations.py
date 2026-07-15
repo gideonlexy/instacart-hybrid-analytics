@@ -58,6 +58,24 @@ def test_orders_eval_set_domain(silver_module):
     assert silver_module.ACCEPTED_EVAL_SETS == ("prior", "train", "test")
 
 
+def test_order_products_silver_columns_are_explicit(silver_module):
+    assert silver_module.ORDER_PRODUCTS_SILVER_COLUMNS == (
+        "order_id",
+        "product_id",
+        "add_to_cart_order",
+        "reordered",
+        "_ingestion_timestamp",
+        "_source_file",
+    )
+
+
+def test_order_products_required_columns_match_output_columns(silver_module):
+    assert (
+        silver_module.ORDER_PRODUCTS_REQUIRED_COLUMNS
+        == silver_module.ORDER_PRODUCTS_SILVER_COLUMNS
+    )
+
+
 def test_delta_table_path_helpers(silver_module):
     assert silver_module.bronze_table_path("orders").name == "orders"
     assert silver_module.bronze_table_path("orders").parent.name == "bronze"
