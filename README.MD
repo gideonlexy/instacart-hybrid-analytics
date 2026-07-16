@@ -32,7 +32,7 @@ Completed:
 
 Next:
 
-- Complete Silver validation coverage and move into Gold marts/features.
+- Build Gold marts/features from the validated Silver tables.
 
 ## Why This Project
 
