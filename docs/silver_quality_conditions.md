@@ -15,9 +15,15 @@ The Silver layer converts Bronze Delta tables into typed, validated tables that 
 9. Combined `order_products` preserves ML semantics with `source_set` values of `prior` or `train`.
 10. `product_catalog` joins products, aisles, and departments with required lookup fields present.
 11. Product, aisle, and department identifiers must be greater than or equal to 1.
+12. `orders.order_id` must be unique.
+13. `product_catalog.product_id` must be unique.
+14. Combined `order_products` must be unique at `(order_id, product_id, source_set)`.
+15. Every `order_products.order_id` must exist in `orders`.
+16. Every `order_products.product_id` must exist in `product_catalog`.
 
 ## Design Notes
 
 - Separate `order_products_prior` and `order_products_train` outputs are retained for ML/evaluation workflows.
 - The combined `order_products` table adds `source_set` so Gold marts can use one line-item table without losing dataset meaning.
 - Product lookup tables are exposed as one `product_catalog` dimension to simplify analytics joins downstream.
+- Persisted Silver outputs are read back and audited before the job completes, so downstream layers only run after key and relationship checks pass.

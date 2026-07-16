@@ -7,6 +7,10 @@ from pathlib import Path
 
 import pytest
 
+from src.data.silver.common import (
+    raise_if_duplicate_keys_found,
+    raise_if_orphan_keys_found,
+)
 from src.data.silver.order_products import (
     ACCEPTED_ORDER_PRODUCT_SOURCE_SETS,
     COMBINED_ORDER_PRODUCTS_REQUIRED_COLUMNS,
@@ -136,3 +140,12 @@ def test_delta_table_path_helpers(silver_runner):
     assert silver_runner.bronze_table_path("orders").parent.name == "bronze"
     assert silver_runner.silver_table_path("orders").name == "orders"
     assert silver_runner.silver_table_path("orders").parent.name == "silver"
+
+
+def test_silver_common_exposes_key_validation_helpers():
+    assert callable(raise_if_duplicate_keys_found)
+    assert callable(raise_if_orphan_keys_found)
+
+
+def test_silver_runner_exposes_persisted_relationship_validation(silver_runner):
+    assert callable(silver_runner.validate_persisted_silver_relationships)
