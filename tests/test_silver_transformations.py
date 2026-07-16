@@ -8,6 +8,9 @@ from pathlib import Path
 import pytest
 
 from src.data.silver.order_products import (
+    ACCEPTED_ORDER_PRODUCT_SOURCE_SETS,
+    COMBINED_ORDER_PRODUCTS_REQUIRED_COLUMNS,
+    COMBINED_ORDER_PRODUCTS_SILVER_COLUMNS,
     ORDER_PRODUCTS_REQUIRED_COLUMNS,
     ORDER_PRODUCTS_SILVER_COLUMNS,
 )
@@ -103,6 +106,29 @@ def test_product_catalog_required_columns_match_output_columns():
 
 def test_order_products_required_columns_match_output_columns():
     assert ORDER_PRODUCTS_REQUIRED_COLUMNS == ORDER_PRODUCTS_SILVER_COLUMNS
+
+
+def test_combined_order_products_silver_columns_are_explicit():
+    assert COMBINED_ORDER_PRODUCTS_SILVER_COLUMNS == (
+        "order_id",
+        "product_id",
+        "add_to_cart_order",
+        "reordered",
+        "source_set",
+        "_ingestion_timestamp",
+        "_source_file",
+    )
+
+
+def test_combined_order_products_required_columns_match_output_columns():
+    assert (
+        COMBINED_ORDER_PRODUCTS_REQUIRED_COLUMNS
+        == COMBINED_ORDER_PRODUCTS_SILVER_COLUMNS
+    )
+
+
+def test_combined_order_products_source_set_domain():
+    assert ACCEPTED_ORDER_PRODUCT_SOURCE_SETS == ("prior", "train")
 
 
 def test_delta_table_path_helpers(silver_runner):

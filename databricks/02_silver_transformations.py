@@ -21,7 +21,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.data.silver.common import read_delta_table, write_delta_table  # noqa: E402
 from src.data.silver.order_products import (  # noqa: E402
+    build_combined_order_products_silver,
     build_order_products_silver,
+    validate_combined_order_products_silver,
     validate_order_products_silver,
 )
 from src.data.silver.orders import (  # noqa: E402
@@ -81,6 +83,32 @@ def build_silver_order_products_table(
     return output_path
 
 
+def build_silver_combined_order_products_table(spark: SparkSession) -> Path:
+    """Combine prior/train order-products into one ML-safe Silver table."""
+    bronze_prior_order_products = read_delta_table(
+        spark,
+        bronze_table_path("order_products_prior"),
+    )
+    bronze_train_order_products = read_delta_table(
+        spark,
+        bronze_table_path("order_products_train"),
+    )
+    silver_order_products = build_combined_order_products_silver(
+        bronze_prior_order_products=bronze_prior_order_products,
+        bronze_train_order_products=bronze_train_order_products,
+    )
+
+    print("[SILVER] combined order_products source counts")
+    silver_order_products.groupBy("source_set").count().show()
+
+    validate_combined_order_products_silver(silver_order_products)
+
+    output_path = silver_table_path("order_products")
+    write_delta_table(silver_order_products, output_path)
+
+    return output_path
+
+
 def build_silver_product_catalog_table(
     spark: SparkSession,
 ) -> Path:
@@ -131,6 +159,9 @@ def main() -> int:
             silver_table_name="order_products_train",
         )
         print(f"[SILVER] order_products_train -> {order_products_train_path}")
+
+        order_products_path = build_silver_combined_order_products_table(spark)
+        print(f"[SILVER] order_products -> {order_products_path}")
 
         product_catalog_path = build_silver_product_catalog_table(spark)
         print(f"[SILVER] product_catalog -> {product_catalog_path}")
