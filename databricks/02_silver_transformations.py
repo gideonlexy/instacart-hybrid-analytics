@@ -28,6 +28,11 @@ from src.data.silver.orders import (  # noqa: E402
     build_orders_silver,
     validate_orders_silver,
 )
+from src.data.silver.product_catalog import (  # noqa: E402
+    build_product_catalog_silver,
+    validate_product_catalog_silver,
+)
+
 from src.utils.spark_session import get_spark, stop_spark  # noqa: E402
 
 
@@ -76,6 +81,31 @@ def build_silver_order_products_table(
     return output_path
 
 
+def build_silver_product_catalog_table(
+    spark: SparkSession,
+) -> Path:
+    """Read Bronze products lookup tables, validate, and write Silver product catalog."""
+    bronze_products = read_delta_table(spark, bronze_table_path("products"))
+    bronze_aisles = read_delta_table(spark, bronze_table_path("aisles"))
+    bronze_departments = read_delta_table(spark, bronze_table_path("departments"))
+
+    silver_product_catalog = build_product_catalog_silver(
+        products=bronze_products,
+        aisles=bronze_aisles,
+        departments=bronze_departments,
+    )
+
+    print("[SILVER] product_catalog preview")
+    silver_product_catalog.show(5, truncate=False)
+
+    validate_product_catalog_silver(silver_product_catalog)
+
+    output_path = silver_table_path("product_catalog")
+    write_delta_table(silver_product_catalog, output_path)
+
+    return output_path
+
+
 def main() -> int:
     """Run Silver transformations."""
     spark = get_spark("instacart_silver_transformations")
@@ -101,6 +131,9 @@ def main() -> int:
             silver_table_name="order_products_train",
         )
         print(f"[SILVER] order_products_train -> {order_products_train_path}")
+
+        product_catalog_path = build_silver_product_catalog_table(spark)
+        print(f"[SILVER] product_catalog -> {product_catalog_path}")
 
         print("[SILVER] Transformations complete")
         return 0

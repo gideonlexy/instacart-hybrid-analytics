@@ -17,6 +17,11 @@ from src.data.silver.orders import (
     ORDERS_SILVER_COLUMNS,
 )
 
+from src.data.silver.product_catalog import (
+    PRODUCT_CATALOG_REQUIRED_COLUMNS,
+    PRODUCT_CATALOG_SILVER_COLUMNS,
+)
+
 
 SILVER_SCRIPT = (
     Path(__file__).resolve().parents[1] / "databricks" / "02_silver_transformations.py"
@@ -77,6 +82,23 @@ def test_order_products_silver_columns_are_explicit():
         "_ingestion_timestamp",
         "_source_file",
     )
+
+
+def test_product_catalog_silver_columns_are_explicit():
+    assert PRODUCT_CATALOG_SILVER_COLUMNS == (
+        "product_id",
+        "product_name",
+        "aisle_id",
+        "aisle",
+        "department_id",
+        "department",
+        "_ingestion_timestamp",
+        "_source_file",
+    )
+
+
+def test_product_catalog_required_columns_match_output_columns():
+    assert PRODUCT_CATALOG_REQUIRED_COLUMNS == PRODUCT_CATALOG_SILVER_COLUMNS
 
 
 def test_order_products_required_columns_match_output_columns():

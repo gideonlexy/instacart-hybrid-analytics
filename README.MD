@@ -28,10 +28,11 @@ Completed:
 - Bronze ingestion from raw CSVs into Delta tables with ingestion metadata.
 - CSV parsing safeguards for quoted product names and numeric field validation.
 - Silver `orders` and order-products transformations with explicit typing and quality checks.
+- Silver product catalog joined from products, aisles, and departments.
 
 Next:
 
-- Continue Silver transformations for product catalog joins.
+- Complete Silver validation coverage and move into Gold marts/features.
 
 ## Why This Project
 
