@@ -7,6 +7,16 @@ from pathlib import Path
 
 import pytest
 
+from src.data.silver.order_products import (
+    ORDER_PRODUCTS_REQUIRED_COLUMNS,
+    ORDER_PRODUCTS_SILVER_COLUMNS,
+)
+from src.data.silver.orders import (
+    ACCEPTED_EVAL_SETS,
+    ORDERS_REQUIRED_COLUMNS,
+    ORDERS_SILVER_COLUMNS,
+)
+
 
 SILVER_SCRIPT = (
     Path(__file__).resolve().parents[1] / "databricks" / "02_silver_transformations.py"
@@ -14,7 +24,7 @@ SILVER_SCRIPT = (
 
 
 @pytest.fixture(scope="module")
-def silver_module():
+def silver_runner():
     spec = importlib.util.spec_from_file_location(
         "silver_transformations", SILVER_SCRIPT
     )
@@ -26,8 +36,8 @@ def silver_module():
     return module
 
 
-def test_orders_silver_columns_are_explicit(silver_module):
-    assert silver_module.ORDERS_SILVER_COLUMNS == (
+def test_orders_silver_columns_are_explicit():
+    assert ORDERS_SILVER_COLUMNS == (
         "order_id",
         "user_id",
         "eval_set",
@@ -40,9 +50,9 @@ def test_orders_silver_columns_are_explicit(silver_module):
     )
 
 
-def test_orders_required_columns_allow_days_since_prior_order_nulls(silver_module):
-    assert "days_since_prior_order" not in silver_module.ORDERS_REQUIRED_COLUMNS
-    assert set(silver_module.ORDERS_REQUIRED_COLUMNS) == {
+def test_orders_required_columns_allow_days_since_prior_order_nulls():
+    assert "days_since_prior_order" not in ORDERS_REQUIRED_COLUMNS
+    assert set(ORDERS_REQUIRED_COLUMNS) == {
         "order_id",
         "user_id",
         "eval_set",
@@ -54,12 +64,12 @@ def test_orders_required_columns_allow_days_since_prior_order_nulls(silver_modul
     }
 
 
-def test_orders_eval_set_domain(silver_module):
-    assert silver_module.ACCEPTED_EVAL_SETS == ("prior", "train", "test")
+def test_orders_eval_set_domain():
+    assert ACCEPTED_EVAL_SETS == ("prior", "train", "test")
 
 
-def test_order_products_silver_columns_are_explicit(silver_module):
-    assert silver_module.ORDER_PRODUCTS_SILVER_COLUMNS == (
+def test_order_products_silver_columns_are_explicit():
+    assert ORDER_PRODUCTS_SILVER_COLUMNS == (
         "order_id",
         "product_id",
         "add_to_cart_order",
@@ -69,15 +79,12 @@ def test_order_products_silver_columns_are_explicit(silver_module):
     )
 
 
-def test_order_products_required_columns_match_output_columns(silver_module):
-    assert (
-        silver_module.ORDER_PRODUCTS_REQUIRED_COLUMNS
-        == silver_module.ORDER_PRODUCTS_SILVER_COLUMNS
-    )
+def test_order_products_required_columns_match_output_columns():
+    assert ORDER_PRODUCTS_REQUIRED_COLUMNS == ORDER_PRODUCTS_SILVER_COLUMNS
 
 
-def test_delta_table_path_helpers(silver_module):
-    assert silver_module.bronze_table_path("orders").name == "orders"
-    assert silver_module.bronze_table_path("orders").parent.name == "bronze"
-    assert silver_module.silver_table_path("orders").name == "orders"
-    assert silver_module.silver_table_path("orders").parent.name == "silver"
+def test_delta_table_path_helpers(silver_runner):
+    assert silver_runner.bronze_table_path("orders").name == "orders"
+    assert silver_runner.bronze_table_path("orders").parent.name == "bronze"
+    assert silver_runner.silver_table_path("orders").name == "orders"
+    assert silver_runner.silver_table_path("orders").parent.name == "silver"

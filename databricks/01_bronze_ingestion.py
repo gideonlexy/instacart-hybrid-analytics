@@ -20,8 +20,8 @@ from pyspark.sql.functions import col, current_timestamp, lit
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from databricks.utilities.spark_session import get_spark, stop_spark  # noqa: E402
 from src.data.raw_contract import RAW_FILE_CONTRACTS, RawFileContract  # noqa: E402
+from src.utils.spark_session import get_spark, stop_spark  # noqa: E402
 
 
 RAW_PATH = Path(os.getenv("RAW_DATA_PATH", PROJECT_ROOT / "data" / "raw"))

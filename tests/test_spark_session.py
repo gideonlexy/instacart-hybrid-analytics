@@ -4,7 +4,7 @@ These tests intentionally avoid starting Spark so they can run before Java is
 installed on a new development machine.
 """
 
-from databricks.utilities.spark_session import (
+from src.utils.spark_session import (
     build_local_spark_builder,
     is_databricks_runtime,
 )
