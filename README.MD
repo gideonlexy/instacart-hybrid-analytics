@@ -27,10 +27,12 @@ Completed:
 - Unit tests for Spark setup and raw data validation.
 - Bronze ingestion from raw CSVs into Delta tables with ingestion metadata.
 - CSV parsing safeguards for quoted product names and numeric field validation.
+- Silver `orders` and order-products transformations with explicit typing and quality checks.
+- Silver product catalog joined from products, aisles, and departments.
 
 Next:
 
-- Build Silver tables with typed columns, cleaned keys, and business-ready joins.
+- Build Gold marts/features from the validated Silver tables.
 
 ## Why This Project
 
@@ -62,4 +64,5 @@ Most portfolio projects stop at notebooks or dashboards. This project is designe
 .venv/bin/python scripts/verify_local_spark.py
 .venv/bin/python scripts/validate_raw_data.py
 .venv/bin/python databricks/01_bronze_ingestion.py
+.venv/bin/python databricks/02_silver_transformations.py
 ```
