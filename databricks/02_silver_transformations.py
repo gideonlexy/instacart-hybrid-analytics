@@ -19,9 +19,17 @@ from pyspark.sql import SparkSession
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.data.silver.common import read_delta_table, write_delta_table  # noqa: E402
+from src.data.silver.common import (  # noqa: E402
+    raise_if_duplicate_keys_found,
+    raise_if_orphan_keys_found,
+    read_delta_table,
+    write_delta_table,
+)
 from src.data.silver.order_products import (  # noqa: E402
+    COMBINED_ORDER_PRODUCTS_SILVER_COLUMNS,
+    build_combined_order_products_silver,
     build_order_products_silver,
+    validate_combined_order_products_silver,
     validate_order_products_silver,
 )
 from src.data.silver.orders import (  # noqa: E402
@@ -81,6 +89,32 @@ def build_silver_order_products_table(
     return output_path
 
 
+def build_silver_combined_order_products_table(spark: SparkSession) -> Path:
+    """Combine prior/train order-products into one ML-safe Silver table."""
+    bronze_prior_order_products = read_delta_table(
+        spark,
+        bronze_table_path("order_products_prior"),
+    )
+    bronze_train_order_products = read_delta_table(
+        spark,
+        bronze_table_path("order_products_train"),
+    )
+    silver_order_products = build_combined_order_products_silver(
+        bronze_prior_order_products=bronze_prior_order_products,
+        bronze_train_order_products=bronze_train_order_products,
+    )
+
+    print("[SILVER] combined order_products source counts")
+    silver_order_products.groupBy("source_set").count().show()
+
+    validate_combined_order_products_silver(silver_order_products)
+
+    output_path = silver_table_path("order_products")
+    write_delta_table(silver_order_products, output_path)
+
+    return output_path
+
+
 def build_silver_product_catalog_table(
     spark: SparkSession,
 ) -> Path:
@@ -104,6 +138,50 @@ def build_silver_product_catalog_table(
     write_delta_table(silver_product_catalog, output_path)
 
     return output_path
+
+
+def validate_persisted_silver_relationships(spark: SparkSession) -> None:
+    """Validate key grains and relationships across persisted Silver tables."""
+    silver_orders = read_delta_table(spark, silver_table_path("orders"))
+    silver_order_products = read_delta_table(spark, silver_table_path("order_products"))
+    silver_product_catalog = read_delta_table(
+        spark, silver_table_path("product_catalog")
+    )
+
+    raise_if_duplicate_keys_found(
+        df=silver_orders,
+        key_columns=("order_id",),
+        table_name="silver.orders",
+    )
+    raise_if_duplicate_keys_found(
+        df=silver_product_catalog,
+        key_columns=("product_id",),
+        table_name="silver.product_catalog",
+    )
+    raise_if_duplicate_keys_found(
+        df=silver_order_products,
+        key_columns=("order_id", "product_id", "source_set"),
+        table_name="silver.order_products",
+    )
+
+    raise_if_orphan_keys_found(
+        child_df=silver_order_products,
+        parent_df=silver_orders,
+        key_columns=("order_id",),
+        child_table_name="silver.order_products",
+        parent_table_name="silver.orders",
+        sample_columns=COMBINED_ORDER_PRODUCTS_SILVER_COLUMNS,
+    )
+    raise_if_orphan_keys_found(
+        child_df=silver_order_products,
+        parent_df=silver_product_catalog,
+        key_columns=("product_id",),
+        child_table_name="silver.order_products",
+        parent_table_name="silver.product_catalog",
+        sample_columns=COMBINED_ORDER_PRODUCTS_SILVER_COLUMNS,
+    )
+
+    print("[SILVER] persisted relationship checks passed")
 
 
 def main() -> int:
@@ -132,8 +210,13 @@ def main() -> int:
         )
         print(f"[SILVER] order_products_train -> {order_products_train_path}")
 
+        order_products_path = build_silver_combined_order_products_table(spark)
+        print(f"[SILVER] order_products -> {order_products_path}")
+
         product_catalog_path = build_silver_product_catalog_table(spark)
         print(f"[SILVER] product_catalog -> {product_catalog_path}")
+
+        validate_persisted_silver_relationships(spark)
 
         print("[SILVER] Transformations complete")
         return 0

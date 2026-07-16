@@ -27,7 +27,7 @@ Completed:
 - Unit tests for Spark setup and raw data validation.
 - Bronze ingestion from raw CSVs into Delta tables with ingestion metadata.
 - CSV parsing safeguards for quoted product names and numeric field validation.
-- Silver `orders` and order-products transformations with explicit typing and quality checks.
+- Silver `orders` and order-products transformations with explicit typing, key/relationship checks, and ML-safe source tracking.
 - Silver product catalog joined from products, aisles, and departments.
 
 Next:
