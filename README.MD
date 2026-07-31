@@ -29,10 +29,11 @@ Completed:
 - CSV parsing safeguards for quoted product names and numeric field validation.
 - Silver `orders` and order-products transformations with explicit typing, key/relationship checks, and ML-safe source tracking.
 - Silver product catalog joined from products, aisles, and departments.
+- Gold `user_behavior` feature mart at one row per user.
 
 Next:
 
-- Build Gold marts/features from the validated Silver tables.
+- Continue Gold feature marts for reorder prediction, product performance, retention, and temporal volume.
 
 ## Why This Project
 
