@@ -33,6 +33,7 @@ models/*
 
 # Local-only project notes and source guide artifacts
 .local/
+docs/project_implementation_interview_brief.md
 INSTACART_HYBRID_IMPLEMENTATION_GUIDE.pdf
 *_IMPLEMENTATION_GUIDE.pdf
 *_guide_extracted.txt
