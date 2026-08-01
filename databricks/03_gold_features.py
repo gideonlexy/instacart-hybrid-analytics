@@ -19,6 +19,10 @@ from pyspark.sql import SparkSession
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.data.gold.product_performance import (  # noqa: E402
+    build_product_performance_gold,
+    validate_product_performance_gold,
+)
 from src.data.gold.reorder_features import (  # noqa: E402
     build_reorder_features_gold,
     validate_reorder_features_gold,
@@ -101,6 +105,36 @@ def build_gold_reorder_features_table(spark: SparkSession) -> Path:
         reorder_features.unpersist()
 
 
+def build_gold_product_performance_table(spark: SparkSession) -> Path:
+    """Build, validate, and write the Gold product performance mart."""
+    silver_order_products = read_delta_table(spark, silver_table_path("order_products"))
+    silver_product_catalog = read_delta_table(
+        spark, silver_table_path("product_catalog")
+    )
+
+    product_performance = build_product_performance_gold(
+        order_products=silver_order_products,
+        product_catalog=silver_product_catalog,
+    )
+    product_performance.cache()
+
+    try:
+        row_count = product_performance.count()
+        print(f"[GOLD] product_performance rows: {row_count:,}")
+
+        print("[GOLD] product_performance preview")
+        product_performance.show(5, truncate=False)
+
+        validate_product_performance_gold(product_performance)
+
+        output_path = gold_table_path("product_performance")
+        write_delta_table(product_performance, output_path)
+
+        return output_path
+    finally:
+        product_performance.unpersist()
+
+
 def main() -> int:
     """Run Gold feature mart transformations."""
     spark = get_spark("instacart_gold_features")
@@ -115,6 +149,9 @@ def main() -> int:
 
         reorder_features_path = build_gold_reorder_features_table(spark)
         print(f"[GOLD] reorder_features -> {reorder_features_path}")
+
+        product_performance_path = build_gold_product_performance_table(spark)
+        print(f"[GOLD] product_performance -> {product_performance_path}")
 
         print("[GOLD] Feature marts complete")
         return 0

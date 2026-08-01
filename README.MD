@@ -31,10 +31,11 @@ Completed:
 - Silver product catalog joined from products, aisles, and departments.
 - Gold `user_behavior` feature mart at one row per user.
 - Gold `reorder_features` feature mart at one row per user-product pair for reorder prediction.
+- Gold `product_performance` feature mart at one row per product for product KPIs.
 
 Next:
 
-- Continue Gold feature marts for product performance, retention, and temporal volume.
+- Continue Gold feature marts for retention and temporal volume.
 
 ## Why This Project
 

@@ -7,6 +7,11 @@ from pathlib import Path
 
 import pytest
 
+from src.data.gold.product_performance import (
+    PRODUCT_PERFORMANCE_FEATURE_SOURCE_SET,
+    PRODUCT_PERFORMANCE_GOLD_COLUMNS,
+    PRODUCT_PERFORMANCE_REQUIRED_COLUMNS,
+)
 from src.data.gold.reorder_features import (
     REORDER_FEATURES_FEATURE_SOURCE_SET,
     REORDER_FEATURES_GOLD_COLUMNS,
@@ -78,6 +83,30 @@ def test_reorder_features_use_historical_source_set():
     assert REORDER_FEATURES_FEATURE_SOURCE_SET == "prior"
 
 
+def test_product_performance_gold_columns_are_explicit():
+    assert PRODUCT_PERFORMANCE_GOLD_COLUMNS == (
+        "product_id",
+        "product_name",
+        "aisle_id",
+        "aisle",
+        "department_id",
+        "department",
+        "total_orders",
+        "unique_orders",
+        "reorder_rate",
+        "avg_cart_position",
+        "_ingestion_timestamp",
+    )
+
+
+def test_product_performance_required_columns_match_output_columns():
+    assert PRODUCT_PERFORMANCE_REQUIRED_COLUMNS == PRODUCT_PERFORMANCE_GOLD_COLUMNS
+
+
+def test_product_performance_uses_historical_source_set():
+    assert PRODUCT_PERFORMANCE_FEATURE_SOURCE_SET == "prior"
+
+
 def test_gold_table_path_helpers(gold_runner):
     assert gold_runner.silver_table_path("orders").name == "orders"
     assert gold_runner.silver_table_path("orders").parent.name == "silver"
@@ -91,3 +120,7 @@ def test_gold_runner_exposes_user_behavior_build_step(gold_runner):
 
 def test_gold_runner_exposes_reorder_features_build_step(gold_runner):
     assert callable(gold_runner.build_gold_reorder_features_table)
+
+
+def test_gold_runner_exposes_product_performance_build_step(gold_runner):
+    assert callable(gold_runner.build_gold_product_performance_table)
