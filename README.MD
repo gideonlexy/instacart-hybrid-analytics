@@ -30,10 +30,11 @@ Completed:
 - Silver `orders` and order-products transformations with explicit typing, key/relationship checks, and ML-safe source tracking.
 - Silver product catalog joined from products, aisles, and departments.
 - Gold `user_behavior` feature mart at one row per user.
+- Gold `reorder_features` feature mart at one row per user-product pair for reorder prediction.
 
 Next:
 
-- Continue Gold feature marts for reorder prediction, product performance, retention, and temporal volume.
+- Continue Gold feature marts for product performance, retention, and temporal volume.
 
 ## Why This Project
 

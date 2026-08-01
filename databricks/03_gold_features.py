@@ -19,6 +19,10 @@ from pyspark.sql import SparkSession
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.data.gold.reorder_features import (  # noqa: E402
+    build_reorder_features_gold,
+    validate_reorder_features_gold,
+)
 from src.data.gold.user_behavior import (  # noqa: E402
     build_user_behavior_gold,
     validate_user_behavior_gold,
@@ -69,6 +73,34 @@ def build_gold_user_behavior_table(spark: SparkSession) -> Path:
         user_behavior.unpersist()
 
 
+def build_gold_reorder_features_table(spark: SparkSession) -> Path:
+    """Build, validate, and write the Gold reorder features mart."""
+    silver_orders = read_delta_table(spark, silver_table_path("orders"))
+    silver_order_products = read_delta_table(spark, silver_table_path("order_products"))
+
+    reorder_features = build_reorder_features_gold(
+        orders=silver_orders,
+        order_products=silver_order_products,
+    )
+    reorder_features.cache()
+
+    try:
+        row_count = reorder_features.count()
+        print(f"[GOLD] reorder_features rows: {row_count:,}")
+
+        print("[GOLD] reorder_features preview")
+        reorder_features.show(5, truncate=False)
+
+        validate_reorder_features_gold(reorder_features)
+
+        output_path = gold_table_path("reorder_features")
+        write_delta_table(reorder_features, output_path)
+
+        return output_path
+    finally:
+        reorder_features.unpersist()
+
+
 def main() -> int:
     """Run Gold feature mart transformations."""
     spark = get_spark("instacart_gold_features")
@@ -80,6 +112,9 @@ def main() -> int:
 
         user_behavior_path = build_gold_user_behavior_table(spark)
         print(f"[GOLD] user_behavior -> {user_behavior_path}")
+
+        reorder_features_path = build_gold_reorder_features_table(spark)
+        print(f"[GOLD] reorder_features -> {reorder_features_path}")
 
         print("[GOLD] Feature marts complete")
         return 0

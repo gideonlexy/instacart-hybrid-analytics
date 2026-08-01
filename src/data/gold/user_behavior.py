@@ -34,6 +34,7 @@ USER_BEHAVIOR_GOLD_COLUMNS = (
     "_ingestion_timestamp",
 )
 USER_BEHAVIOR_REQUIRED_COLUMNS = USER_BEHAVIOR_GOLD_COLUMNS
+USER_BEHAVIOR_FEATURE_SOURCE_SET = "prior"
 
 
 def build_user_behavior_gold(
@@ -44,7 +45,11 @@ def build_user_behavior_gold(
 
     Grain: one row per user_id.
     """
-    orders_with_products = order_products.select("order_id").distinct()
+    historical_order_products = order_products.where(
+        col("source_set") == USER_BEHAVIOR_FEATURE_SOURCE_SET
+    )
+
+    orders_with_products = historical_order_products.select("order_id").distinct()
     active_orders = orders.join(orders_with_products, on="order_id", how="inner")
 
     order_metrics = active_orders.groupBy("user_id").agg(
@@ -58,7 +63,7 @@ def build_user_behavior_gold(
     )
 
     order_products_with_users = orders.select("order_id", "user_id").join(
-        order_products,
+        historical_order_products,
         on="order_id",
         how="inner",
     )
