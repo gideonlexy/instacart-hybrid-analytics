@@ -23,6 +23,10 @@ from src.data.gold.product_performance import (  # noqa: E402
     build_product_performance_gold,
     validate_product_performance_gold,
 )
+from src.data.gold.retention_metrics import (  # noqa: E402
+    build_retention_metrics_gold,
+    validate_retention_metrics_gold,
+)
 from src.data.gold.reorder_features import (  # noqa: E402
     build_reorder_features_gold,
     validate_reorder_features_gold,
@@ -135,6 +139,30 @@ def build_gold_product_performance_table(spark: SparkSession) -> Path:
         product_performance.unpersist()
 
 
+def build_gold_retention_metrics_table(spark: SparkSession) -> Path:
+    """Build, validate, and write the Gold retention metrics mart."""
+    silver_orders = read_delta_table(spark, silver_table_path("orders"))
+
+    retention_metrics = build_retention_metrics_gold(orders=silver_orders)
+    retention_metrics.cache()
+
+    try:
+        row_count = retention_metrics.count()
+        print(f"[GOLD] retention_metrics rows: {row_count:,}")
+
+        print("[GOLD] retention_metrics preview")
+        retention_metrics.show(5, truncate=False)
+
+        validate_retention_metrics_gold(retention_metrics)
+
+        output_path = gold_table_path("retention_metrics")
+        write_delta_table(retention_metrics, output_path)
+
+        return output_path
+    finally:
+        retention_metrics.unpersist()
+
+
 def main() -> int:
     """Run Gold feature mart transformations."""
     spark = get_spark("instacart_gold_features")
@@ -152,6 +180,9 @@ def main() -> int:
 
         product_performance_path = build_gold_product_performance_table(spark)
         print(f"[GOLD] product_performance -> {product_performance_path}")
+
+        retention_metrics_path = build_gold_retention_metrics_table(spark)
+        print(f"[GOLD] retention_metrics -> {retention_metrics_path}")
 
         print("[GOLD] Feature marts complete")
         return 0

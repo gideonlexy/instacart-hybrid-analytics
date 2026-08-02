@@ -12,6 +12,12 @@ from src.data.gold.product_performance import (
     PRODUCT_PERFORMANCE_GOLD_COLUMNS,
     PRODUCT_PERFORMANCE_REQUIRED_COLUMNS,
 )
+from src.data.gold.retention_metrics import (
+    ACCEPTED_RETENTION_SEGMENTS,
+    RETENTION_METRICS_FEATURE_EVAL_SET,
+    RETENTION_METRICS_GOLD_COLUMNS,
+    RETENTION_METRICS_REQUIRED_COLUMNS,
+)
 from src.data.gold.reorder_features import (
     REORDER_FEATURES_FEATURE_SOURCE_SET,
     REORDER_FEATURES_GOLD_COLUMNS,
@@ -107,6 +113,32 @@ def test_product_performance_uses_historical_source_set():
     assert PRODUCT_PERFORMANCE_FEATURE_SOURCE_SET == "prior"
 
 
+def test_retention_metrics_gold_columns_are_explicit():
+    assert RETENTION_METRICS_GOLD_COLUMNS == (
+        "user_id",
+        "total_orders",
+        "retention_segment",
+        "_ingestion_timestamp",
+    )
+
+
+def test_retention_metrics_required_columns_match_output_columns():
+    assert RETENTION_METRICS_REQUIRED_COLUMNS == RETENTION_METRICS_GOLD_COLUMNS
+
+
+def test_retention_metrics_use_historical_eval_set():
+    assert RETENTION_METRICS_FEATURE_EVAL_SET == "prior"
+
+
+def test_retention_segments_are_explicit():
+    assert ACCEPTED_RETENTION_SEGMENTS == (
+        "one_and_done",
+        "light_repeat",
+        "regular",
+        "power_user",
+    )
+
+
 def test_gold_table_path_helpers(gold_runner):
     assert gold_runner.silver_table_path("orders").name == "orders"
     assert gold_runner.silver_table_path("orders").parent.name == "silver"
@@ -124,3 +156,7 @@ def test_gold_runner_exposes_reorder_features_build_step(gold_runner):
 
 def test_gold_runner_exposes_product_performance_build_step(gold_runner):
     assert callable(gold_runner.build_gold_product_performance_table)
+
+
+def test_gold_runner_exposes_retention_metrics_build_step(gold_runner):
+    assert callable(gold_runner.build_gold_retention_metrics_table)

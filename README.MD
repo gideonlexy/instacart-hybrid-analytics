@@ -32,10 +32,11 @@ Completed:
 - Gold `user_behavior` feature mart at one row per user.
 - Gold `reorder_features` feature mart at one row per user-product pair for reorder prediction.
 - Gold `product_performance` feature mart at one row per product for product KPIs.
+- Gold `retention_metrics` mart at one row per user for repeat-behavior segmentation.
 
 Next:
 
-- Continue Gold feature marts for retention and temporal volume.
+- Continue Gold feature marts for temporal volume.
 
 ## Why This Project
 
