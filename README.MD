@@ -29,10 +29,15 @@ Completed:
 - CSV parsing safeguards for quoted product names and numeric field validation.
 - Silver `orders` and order-products transformations with explicit typing, key/relationship checks, and ML-safe source tracking.
 - Silver product catalog joined from products, aisles, and departments.
+- Gold `user_behavior` feature mart at one row per user.
+- Gold `reorder_features` feature mart at one row per user-product pair for reorder prediction.
+- Gold `product_performance` feature mart at one row per product for product KPIs.
+- Gold `retention_metrics` mart at one row per user for repeat-behavior segmentation.
+- Gold `temporal_volume` mart at one row per day/hour bucket for order-volume analysis.
 
 Next:
 
-- Build Gold marts/features from the validated Silver tables.
+- Prepare Gold layer for Snowflake/dbt warehouse integration.
 
 ## Why This Project
 
