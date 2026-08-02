@@ -23,6 +23,11 @@ from src.data.gold.reorder_features import (
     REORDER_FEATURES_GOLD_COLUMNS,
     REORDER_FEATURES_REQUIRED_COLUMNS,
 )
+from src.data.gold.temporal_volume import (
+    TEMPORAL_VOLUME_GOLD_COLUMNS,
+    TEMPORAL_VOLUME_REQUIRED_COLUMNS,
+    TEMPORAL_VOLUME_SOURCE_EVAL_SETS,
+)
 from src.data.gold.user_behavior import (
     USER_BEHAVIOR_FEATURE_SOURCE_SET,
     USER_BEHAVIOR_GOLD_COLUMNS,
@@ -139,6 +144,23 @@ def test_retention_segments_are_explicit():
     )
 
 
+def test_temporal_volume_gold_columns_are_explicit():
+    assert TEMPORAL_VOLUME_GOLD_COLUMNS == (
+        "order_dow",
+        "order_hour_of_day",
+        "order_count",
+        "_ingestion_timestamp",
+    )
+
+
+def test_temporal_volume_required_columns_match_output_columns():
+    assert TEMPORAL_VOLUME_REQUIRED_COLUMNS == TEMPORAL_VOLUME_GOLD_COLUMNS
+
+
+def test_temporal_volume_uses_all_validated_eval_sets():
+    assert TEMPORAL_VOLUME_SOURCE_EVAL_SETS == ("prior", "train", "test")
+
+
 def test_gold_table_path_helpers(gold_runner):
     assert gold_runner.silver_table_path("orders").name == "orders"
     assert gold_runner.silver_table_path("orders").parent.name == "silver"
@@ -160,3 +182,7 @@ def test_gold_runner_exposes_product_performance_build_step(gold_runner):
 
 def test_gold_runner_exposes_retention_metrics_build_step(gold_runner):
     assert callable(gold_runner.build_gold_retention_metrics_table)
+
+
+def test_gold_runner_exposes_temporal_volume_build_step(gold_runner):
+    assert callable(gold_runner.build_gold_temporal_volume_table)

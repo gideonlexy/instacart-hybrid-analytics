@@ -33,10 +33,11 @@ Completed:
 - Gold `reorder_features` feature mart at one row per user-product pair for reorder prediction.
 - Gold `product_performance` feature mart at one row per product for product KPIs.
 - Gold `retention_metrics` mart at one row per user for repeat-behavior segmentation.
+- Gold `temporal_volume` mart at one row per day/hour bucket for order-volume analysis.
 
 Next:
 
-- Continue Gold feature marts for temporal volume.
+- Prepare Gold layer for Snowflake/dbt warehouse integration.
 
 ## Why This Project
 

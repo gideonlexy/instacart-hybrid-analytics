@@ -31,6 +31,10 @@ from src.data.gold.reorder_features import (  # noqa: E402
     build_reorder_features_gold,
     validate_reorder_features_gold,
 )
+from src.data.gold.temporal_volume import (  # noqa: E402
+    build_temporal_volume_gold,
+    validate_temporal_volume_gold,
+)
 from src.data.gold.user_behavior import (  # noqa: E402
     build_user_behavior_gold,
     validate_user_behavior_gold,
@@ -163,6 +167,30 @@ def build_gold_retention_metrics_table(spark: SparkSession) -> Path:
         retention_metrics.unpersist()
 
 
+def build_gold_temporal_volume_table(spark: SparkSession) -> Path:
+    """Build, validate, and write the Gold temporal volume mart."""
+    silver_orders = read_delta_table(spark, silver_table_path("orders"))
+
+    temporal_volume = build_temporal_volume_gold(orders=silver_orders)
+    temporal_volume.cache()
+
+    try:
+        row_count = temporal_volume.count()
+        print(f"[GOLD] temporal_volume rows: {row_count:,}")
+
+        print("[GOLD] temporal_volume preview")
+        temporal_volume.show(5, truncate=False)
+
+        validate_temporal_volume_gold(temporal_volume)
+
+        output_path = gold_table_path("temporal_volume")
+        write_delta_table(temporal_volume, output_path)
+
+        return output_path
+    finally:
+        temporal_volume.unpersist()
+
+
 def main() -> int:
     """Run Gold feature mart transformations."""
     spark = get_spark("instacart_gold_features")
@@ -183,6 +211,9 @@ def main() -> int:
 
         retention_metrics_path = build_gold_retention_metrics_table(spark)
         print(f"[GOLD] retention_metrics -> {retention_metrics_path}")
+
+        temporal_volume_path = build_gold_temporal_volume_table(spark)
+        print(f"[GOLD] temporal_volume -> {temporal_volume_path}")
 
         print("[GOLD] Feature marts complete")
         return 0
